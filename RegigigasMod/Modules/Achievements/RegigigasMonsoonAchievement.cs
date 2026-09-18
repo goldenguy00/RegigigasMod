@@ -1,70 +1,51 @@
-﻿using R2API;
-using R2API.Utils;
-using RoR2;
-using System;
+﻿using RoR2;
+using RoR2.Achievements;
 using UnityEngine;
 
 namespace RegigigasMod.Modules.Achievements
 {
-    internal class MasteryAchievement : ModdedUnlockable
+    //string identifier, string unlockableRewardIdentifier, string prerequisiteAchievementIdentifier, uint lunarCoinReward, Type serverTrackerType = null
+    //automatically creates language tokens "ACHIEVEMENT_{identifier.ToUpper()}_NAME" and "ACHIEVEMENT_{identifier.ToUpper()}_DESCRIPTION" 
+    [RegisterAchievement(IDENTIFIER, UNLOCKABLE_IDENTIFIER, null, 10, null)]
+    internal class RegigigasMasteryAchievement : BaseAchievement
     {
-        public override string AchievementIdentifier { get; } = RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_ACHIEVEMENT_ID";
-        public override string UnlockableIdentifier { get; } = RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_REWARD_ID";
-        public override string AchievementNameToken { get; } = RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_ACHIEVEMENT_NAME";
-        public override string PrerequisiteUnlockableIdentifier { get; } = RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_UNLOCKABLE_REWARD_ID";
-        public override string UnlockableNameToken { get; } = RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_UNLOCKABLE_NAME";
-        public override string AchievementDescToken { get; } = RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_ACHIEVEMENT_DESC";
-        public override Sprite Sprite { get; } = Modules.RegiAssets.secondaryAssetBundle.LoadAsset<Sprite>("texMasterySkinIcon");
+        public const string IDENTIFIER = "ROB_REGIGIGAS_BODY_MONSOONUNLOCKABLE_ACHIEVEMENT_ID";
+        public const string UNLOCKABLE_IDENTIFIER = "ROB_REGIGIGAS_BODY_MONSOONUNLOCKABLE_REWARD_ID";
 
-        public override Func<string> GetHowToUnlock { get; } = (() => Language.GetStringFormatted("UNLOCK_VIA_ACHIEVEMENT_FORMAT", new object[]
-                            {
-                                Language.GetString(RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_ACHIEVEMENT_NAME"),
-                                Language.GetString(RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_ACHIEVEMENT_DESC")
-                            }));
-        public override Func<string> GetUnlocked { get; } = (() => Language.GetStringFormatted("UNLOCKED_FORMAT", new object[]
-                            {
-                                Language.GetString(RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_ACHIEVEMENT_NAME"),
-                                Language.GetString(RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOONUNLOCKABLE_ACHIEVEMENT_DESC")
-                            }));
+        public static Sprite Sprite => Modules.RegiAssets.secondaryAssetBundle.LoadAsset<Sprite>("texMasterySkinIcon");
 
-        public override BodyIndex LookUpRequiredBodyIndex()
+        public override BodyIndex LookUpRequiredBodyIndex() => BodyCatalog.FindBodyIndex("RegigigasPlayerBody");
+
+        public override void OnBodyRequirementMet()
         {
-            return BodyCatalog.FindBodyIndex("RegigigasPlayerBody");
+            base.OnBodyRequirementMet();
+
+            Run.onClientGameOverGlobal += this.Run_OnClientGameOverGlobal;
         }
-        
-        public void ClearCheck(Run run, RunReport runReport)
+
+        public override void OnBodyRequirementBroken()
         {
-            if (run is null) return;
-            if (runReport is null) return;
+            base.OnBodyRequirementBroken();
 
-            if (!runReport.gameEnding) return;
+            Run.onClientGameOverGlobal -= this.Run_OnClientGameOverGlobal;
+        }
 
-            if (runReport.gameEnding.isWin)
+        protected virtual void Run_OnClientGameOverGlobal(Run run, RunReport runReport)
+        {
+            if (base.meetsBodyRequirement && runReport?.gameEnding && runReport.gameEnding.isWin)
             {
-                DifficultyDef difficultyDef = DifficultyCatalog.GetDifficultyDef(runReport.ruleBook.FindDifficulty());
-
-                if (difficultyDef != null && difficultyDef.countsAsHardMode)
+                var difficultyIndex = runReport.ruleBook.FindDifficulty();
+                var difficultyDef = DifficultyCatalog.GetDifficultyDef(difficultyIndex);
+                if (difficultyDef != null)
                 {
-                    if (base.meetsBodyRequirement)
-                    {
-                        base.Grant();
-                    }
+                    var isDifficulty = difficultyDef.countsAsHardMode || difficultyDef.scalingValue >= 3f;
+                    var isInferno = difficultyDef.nameToken == "INFERNO_NAME";
+                    var isEclipse = difficultyIndex <= DifficultyIndex.Eclipse8 && difficultyIndex >= DifficultyIndex.Hard;
+
+                    if (isDifficulty || isInferno || isEclipse)
+                        Grant();
                 }
             }
-        }
-
-        public override void OnInstall()
-        {
-            base.OnInstall();
-
-            Run.onClientGameOverGlobal += this.ClearCheck;
-        }
-
-        public override void OnUninstall()
-        {
-            base.OnUninstall();
-
-            Run.onClientGameOverGlobal -= this.ClearCheck;
         }
     }
 }

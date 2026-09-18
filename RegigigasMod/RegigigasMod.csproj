@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>latestMajor</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>latestMajor</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,30 +32,31 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="BepInEx.Core" Version="5.4.19" />
-		<PackageReference Include="RiskOfRain2.GameLibs" Version="1.4.0-r.0" />
-		<PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
-		<PackageReference Include="MMHOOK.RoR2" Version="2025.11.19">
+		<PackageReference Include="BepInEx.Core" Version="5.4.21" />
+		<PackageReference Include="Moffein-Risky_Artifacts" Version="2.5.3" />
+		<PackageReference Include="R2API.ContentManagement" Version="1.0.11" />
+		<PackageReference Include="R2API.Core" Version="5.3.0" />
+		<PackageReference Include="R2API.DamageType" Version="1.1.7" />
+		<PackageReference Include="R2API.Director" Version="3.1.0" />
+		<PackageReference Include="R2API.Items" Version="1.0.8" />
+		<PackageReference Include="R2API.Language" Version="1.1.0" />
+		<PackageReference Include="R2API.Networking" Version="1.0.4" />
+		<PackageReference Include="R2API.Prefab" Version="1.1.1" />
+		<PackageReference Include="R2API.RecalculateStats" Version="1.6.6" />
+		<PackageReference Include="R2API.Skins" Version="1.4.7" />
+		<PackageReference Include="R2API.Sound" Version="1.0.3" />
+		<PackageReference Include="RiskOfRain2.GameLibs" Version="1.4.1-r.0" />
+		<PackageReference Include="RoR2BepInExPack" Version="1.43.0" />
+		<PackageReference Include="Rune580-Risk_Of_Options" Version="2.8.6" />
+		<PackageReference Include="MMHOOK.RoR2" Version="2025.12.9">
 			<NoWarn>NU1701</NoWarn>
 		</PackageReference>
-		<PackageReference Include="R2API" Version="4.3.5" />
+		<PackageReference Include="score-MiscFixes" Version="1.5.9" />
 	</ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="regigigas" />
-    <EmbeddedResource Include="regigigas2" />
-    <EmbeddedResource Include="RegigigasBank.bnk" />
-  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Decalicious">
       <HintPath>libs\Decalicious.dll</HintPath>
-    </Reference>
-    <Reference Include="RiskOfOptions">
-      <HintPath>libs\RiskOfOptions.dll</HintPath>
-    </Reference>
-    <Reference Include="Risky_Artifacts">
-      <HintPath>libs\Risky_Artifacts.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>..\..\Hunk\HunkProject\libs\Unity.Postprocessing.Runtime.dll</HintPath>
@@ -69,7 +70,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="call &quot;$(ProjectDir)weave.bat&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Erikbir&quot; copy /Y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)\..\ReleaseStuff&quot;&#xD;&#xA;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Erikbir&quot; copy &quot;$(TargetPath)&quot; &quot;E:\r2Profiles\Blinx Returns\BepInEx\plugins\TheTimesweeper-Regigigas&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Erikbir&quot; copy &quot;$(TargetPath)&quot; &quot;E:\r2Profiles\uh help\BepInEx\plugins\TheTimesweeper-Regigigas&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Erikbir&quot; mkdir &quot;C:\EnforcerBuild\plugins\TheTimesweeper-Regigigas&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Erikbir&quot; copy /Y &quot;$(TargetPath)&quot; &quot;C:\EnforcerBuild\plugins\TheTimesweeper-Regigigas&quot;" />
+    <Exec Command="call postbuild.bat $(TargetDir) $(AssemblyName)" />
   </Target>
   
 </Project>

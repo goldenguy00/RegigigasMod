@@ -32,6 +32,7 @@ namespace RegigigasMod.Modules
 
         internal static List<EffectDef> effectDefs = new List<EffectDef>();
         internal static List<NetworkSoundEventDef> networkSoundEventDefs = new List<NetworkSoundEventDef>();
+        internal static List<UnlockableDef> unlockableDefs = new List<UnlockableDef>();
 
         internal static GameObject slowStartEffect;
         internal static GameObject slowStartReleasedEffect;

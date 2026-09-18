@@ -5,34 +5,35 @@ using RoR2;
 using System.Security;
 using System.Security.Permissions;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using RoR2BepInExPack.GameAssetPathsBetter;
 
 [module: UnverifiableCode]
+#pragma warning disable CS0618 // Type or member is obsolete
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+#pragma warning restore CS0618 // Type or member is obsolete
 
 namespace RegigigasMod
 {
     [BepInDependency("com.Moffein.RiskyArtifacts", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency("com.bepis.r2api", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.DamageAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.DirectorAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.ItemAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.LanguageAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.Networking.NetworkingAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.PrefabAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.RecalculateStatsAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.Skins.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(R2API.SoundAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInPlugin(MODUID, MODNAME, MODVERSION)]
-    [R2APISubmoduleDependency(new string[]
-    {
-        "PrefabAPI",
-        "LanguageAPI",
-        "SoundAPI",
-        "DirectorAPI",
-        "LoadoutAPI",
-        "UnlockableAPI",
-        "NetworkingAPI",
-        "RecalculateStatsAPI",
-    })]
-
     public class RegigigasPlugin : BaseUnityPlugin
     {
         public const string MODUID = "com.rob.RegigigasMod";
         public const string MODNAME = "RegigigasMod";
-        public const string MODVERSION = "1.6.0";
+        public const string MODVERSION = "1.6.1";
 
         public const string developerPrefix = "ROB";
 
@@ -68,13 +69,17 @@ namespace RegigigasMod
             RoR2.ContentManagement.ContentManager.onContentPacksAssigned += LateSetup;
         }
 
-        private void LateSetup(global::HG.ReadOnlyArray<RoR2.ContentManagement.ReadOnlyContentPack> obj)
+        private void LateSetup(HG.ReadOnlyArray<RoR2.ContentManagement.ReadOnlyContentPack> obj)
         {
             Modules.Enemies.Regigigas.SetItemDisplays();
 
+
             // hate that i havze to do this
-            Modules.Buffs.armorBuff.iconSprite = RoR2Content.Buffs.ArmorBoost.iconSprite;
+            //Modules.Buffs.armorBuff.iconSprite = RoR2Content.Buffs.ArmorBoost.iconSprite;
             //Modules.Buffs.slowStartBuff.iconSprite = RoR2Content.Buffs.Slow50.iconSprite; wahoo
+
+            // rob you fucking ape
+            Modules.Buffs.armorBuff.iconSprite = Addressables.LoadAssetAsync<Sprite>(RoR2_Base_GainArmor.texBuffElephantArmorBoostIcon_tif).WaitForCompletion();   
         }
 
         private void Hook()

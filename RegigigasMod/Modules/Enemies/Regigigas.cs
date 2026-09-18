@@ -13,6 +13,7 @@ using RoR2.Orbs;
 using UnityEngine.Networking;
 using UnityEngine.AddressableAssets;
 using System;
+using RegigigasMod.Modules.Achievements;
 
 namespace RegigigasMod.Modules.Enemies
 {
@@ -68,7 +69,8 @@ namespace RegigigasMod.Modules.Enemies
             {
                 CreateOrb();
 
-                if (characterEnabled.Value) masteryUnlockableDef = R2API.UnlockableAPI.AddUnlockable<Achievements.MasteryAchievement>();
+                if (characterEnabled.Value)
+                    masteryUnlockableDef = CreateAndAddUnlockableDef(RegigigasMasteryAchievement.IDENTIFIER, RegigigasMasteryAchievement.UNLOCKABLE_IDENTIFIER, RegigigasMasteryAchievement.Sprite);
 
                 characterPrefab = CreateBodyPrefab(false);
                 survivorPrefab = CreateBodyPrefab(true);
@@ -88,6 +90,18 @@ namespace RegigigasMod.Modules.Enemies
             }
 
             Hook();
+        }
+
+        internal static UnlockableDef CreateAndAddUnlockableDef(string identifier, string unlockableIdentifier, Sprite achievementIcon)
+        {
+            var unlockableDef = ScriptableObject.CreateInstance<UnlockableDef>();
+            unlockableDef.cachedName = unlockableIdentifier.ToUpperInvariant();
+            unlockableDef.nameToken = "ACHIEVEMENT_" + identifier.ToUpperInvariant() + "_NAME";
+            unlockableDef.achievementIcon = achievementIcon;
+
+            RegiAssets.unlockableDefs.Add(unlockableDef);
+
+            return unlockableDef;
         }
 
         private static void CreateOrb()
@@ -876,6 +890,37 @@ namespace RegigigasMod.Modules.Enemies
             #endregion
         }
 
+
+        public static SkinDef CreateSkinDef(string skinName, Sprite skinIcon, GameObject root, UnlockableDef unlockableDef,
+            CharacterModel.RendererInfo[] rendererInfos, SkinDefParams.MeshReplacement[] meshReplacements, SkinDefParams.GameObjectActivation[] gameObjectActivations)
+        {
+            return R2API.Skins.CreateNewSkinDef(new R2API.SkinDefParamsInfo
+            {
+                Name = skinName,
+                NameToken = skinName,
+                Icon = skinIcon,
+                RootObject = root,
+                UnlockableDef = unlockableDef,
+                RendererInfos = rendererInfos,
+                MeshReplacements = meshReplacements,
+                GameObjectActivations = gameObjectActivations,
+                BaseSkins = [],
+                MinionSkinReplacements = [],
+                ProjectileGhostReplacements = []
+            });
+        }
+
+        public static CharacterModel.RendererInfo[] SkinRendererInfos(CharacterModel.RendererInfo[] defaultRenderers, Material[] materials)
+        {
+            CharacterModel.RendererInfo[] newRendererInfos = new CharacterModel.RendererInfo[defaultRenderers.Length];
+            defaultRenderers.CopyTo(newRendererInfos, 0);
+
+            for (int i = 0; i < materials.Length; i++)
+                newRendererInfos[i].defaultMaterial = materials[i];
+
+            return newRendererInfos;
+        }
+
         private static void CreateSkins(GameObject prefab, bool isLoreFriendly)
         {
             GameObject model = prefab.GetComponentInChildren<ModelLocator>().modelTransform.gameObject;
@@ -892,81 +937,73 @@ namespace RegigigasMod.Modules.Enemies
 
             // this should work right
             #region DefaultSkin
-            SkinDef defaultSkin = Modules.Skins.CreateSkinDef(RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_DEFAULT_SKIN_NAME",
-                RegiAssets.secondaryAssetBundle.LoadAsset<Sprite>("texDefaultSkinIcon"),
-                defaultRenderers,
-                mainRenderer,
-                model);
-
+            SkinDefParams.MeshReplacement[] meshReplacements = null;
             if (isLoreFriendly)
             {
-                defaultSkin.meshReplacements = new SkinDef.MeshReplacement[]
-                {
-                    new SkinDef.MeshReplacement
+                meshReplacements =
+                [
+                    new SkinDefParams.MeshReplacement
                     {
                         mesh = Modules.RegiAssets.secondaryAssetBundle.LoadAsset<Mesh>("meshRegigigasAlt"),
                         renderer = mainRenderer
                     }
-                };
+                ];
             }
+
+            SkinDef defaultSkin = CreateSkinDef(
+                skinName: RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_DEFAULT_SKIN_NAME",
+                skinIcon: RegiAssets.secondaryAssetBundle.LoadAsset<Sprite>("texDefaultSkinIcon"),
+                root: model,
+                unlockableDef: null,
+                rendererInfos: defaultRenderers,
+                meshReplacements: meshReplacements,
+                gameObjectActivations: null);
 
             skins.Add(defaultSkin);
             #endregion
 
+
             #region MasterySkin
-            SkinDef masterySkin = Modules.Skins.CreateSkinDef(RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOON_SKIN_NAME",
-                RegiAssets.secondaryAssetBundle.LoadAsset<Sprite>("texMasterySkinIcon"),
-                SkinRendererInfos(defaultRenderers, new Material[]
-                {
-                    Modules.RegiAssets.CreateMaterial("matRegigigasShiny", 0f, Color.white)
-                }),
-                mainRenderer,
-                model,
-                masteryUnlockableDef);
-
-            if (isLoreFriendly)
-            {
-                masterySkin.meshReplacements = new SkinDef.MeshReplacement[]
-                {
-                    new SkinDef.MeshReplacement
-                    {
-                        mesh = Modules.RegiAssets.secondaryAssetBundle.LoadAsset<Mesh>("meshRegigigasAlt"),
-                        renderer = mainRenderer
-                    }
-                };
-
-                masterySkin.rendererInfos = SkinRendererInfos(defaultRenderers, new Material[]
-                {
-                    Addressables.LoadAssetAsync<Material>("RoR2/Base/Titan/matTitanGold.mat").WaitForCompletion()
-                });
-            }
+            SkinDef masterySkin = CreateSkinDef(
+                skinName: RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_MONSOON_SKIN_NAME",
+                skinIcon: RegiAssets.secondaryAssetBundle.LoadAsset<Sprite>("texMasterySkinIcon"),
+                root: model,
+                unlockableDef: masteryUnlockableDef,
+                rendererInfos: SkinRendererInfos(defaultRenderers,
+                [
+                    isLoreFriendly ? Addressables.LoadAssetAsync<Material>("RoR2/Base/Titan/matTitanGold.mat").WaitForCompletion() 
+                                   : Modules.RegiAssets.CreateMaterial("matRegigigasShiny", 0f, Color.white)
+                ]),
+                meshReplacements: meshReplacements,
+                gameObjectActivations: null);
 
             skins.Add(masterySkin);
             #endregion
 
             #region BowserSkin
-            SkinDef bowserSkin = Modules.Skins.CreateSkinDef(RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_BOWSER_SKIN_NAME",
-                RegiAssets.secondaryAssetBundle.LoadAsset<Sprite>("texBowserSkin"),
-                SkinRendererInfos(defaultRenderers, new Material[]
-                {
+            SkinDef bowserSkin = CreateSkinDef(
+                skinName: RegigigasPlugin.developerPrefix + "_REGIGIGAS_BODY_BOWSER_SKIN_NAME",
+                skinIcon: RegiAssets.secondaryAssetBundle.LoadAsset<Sprite>("texBowserSkin"),
+                root: model,
+                unlockableDef: null,
+                rendererInfos: SkinRendererInfos(defaultRenderers,
+                [
                     Modules.RegiAssets.CreateMaterial2("matBowser", 0f, Color.black, 1f)
-                }),
-                mainRenderer,
-                model);
-
-            bowserSkin.meshReplacements = new SkinDef.MeshReplacement[]
-            {
-                    new SkinDef.MeshReplacement
+                ]),
+                meshReplacements:
+                [
+                    new SkinDefParams.MeshReplacement
                     {
                         mesh = Modules.RegiAssets.secondaryAssetBundle.LoadAsset<Mesh>("meshBowser"),
                         renderer = mainRenderer
                     }
-            };
+                ],
+                gameObjectActivations: null);
 
             //skins.Add(bowserSkin);
             #endregion
 
-            skinController.skins = skins.ToArray();
+            skinController.skins = [.. skins];
         }
 
         private static void InitializeItemDisplays(GameObject prefab)
@@ -3675,16 +3712,6 @@ localScale = new Vector3(0.17297F, 0.17297F, 0.17297F),
             //itemDisplayRuleSet.GenerateRuntimeValues();
         }
 
-        private static CharacterModel.RendererInfo[] SkinRendererInfos(CharacterModel.RendererInfo[] defaultRenderers, Material[] materials)
-        {
-            CharacterModel.RendererInfo[] newRendererInfos = new CharacterModel.RendererInfo[defaultRenderers.Length];
-            defaultRenderers.CopyTo(newRendererInfos, 0);
-
-            newRendererInfos[1].defaultMaterial = materials[0];
-
-            return newRendererInfos;
-        }
-
         private static void Hook()
         {
             //On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
@@ -3719,7 +3746,7 @@ localScale = new Vector3(0.17297F, 0.17297F, 0.17297F),
         private static SkinDef CopySkinDef(SkinDef skinDef, CharacterModel characterModel)
         {
             CharacterModel.RendererInfo[] rendererInfos = new CharacterModel.RendererInfo[skinDef.rendererInfos.Length];
-            SkinDef.MeshReplacement[] meshReplacements = new SkinDef.MeshReplacement[skinDef.meshReplacements.Length];
+            SkinDefParams.MeshReplacement[] meshReplacements = new SkinDefParams.MeshReplacement[skinDef.meshReplacements.Length];
 
             // hardcoded and straight up unholy. it just works.
             if (skinDef.rendererInfos.Length > 0)
@@ -3741,16 +3768,16 @@ localScale = new Vector3(0.17297F, 0.17297F, 0.17297F),
             }
             // easier would be asking lui to update that mod to add the skins to the enemy body as well, but it is what it is
 
-            LoadoutAPI.SkinDefInfo skinDefInfo = new LoadoutAPI.SkinDefInfo
+            var skinDefInfo = new R2API.SkinDefParamsInfo
             {
-                BaseSkins = Array.Empty<SkinDef>(),
-                GameObjectActivations = new SkinDef.GameObjectActivation[0],
+                BaseSkins = [],
+                GameObjectActivations = [],
                 Icon = skinDef.icon,
                 MeshReplacements = meshReplacements,
-                MinionSkinReplacements = new SkinDef.MinionSkinReplacement[0],
+                MinionSkinReplacements = [],
                 Name = skinDef.name,
                 NameToken = skinDef.nameToken,
-                ProjectileGhostReplacements = new SkinDef.ProjectileGhostReplacement[0],
+                ProjectileGhostReplacements = [],
                 RendererInfos = rendererInfos,
                 RootObject = characterModel.gameObject,
                 UnlockableDef = null
@@ -3759,7 +3786,7 @@ localScale = new Vector3(0.17297F, 0.17297F, 0.17297F),
             // this is so fucking bad
             // GOD
 
-            return LoadoutAPI.CreateNewSkinDef(skinDefInfo);
+            return Skins.CreateNewSkinDef(skinDefInfo);
         }
 
         private static void CharacterBody_AddTimedBuff_BuffDef_float(On.RoR2.CharacterBody.orig_AddTimedBuff_BuffDef_float orig, CharacterBody self, BuffDef buffDef, float duration) {

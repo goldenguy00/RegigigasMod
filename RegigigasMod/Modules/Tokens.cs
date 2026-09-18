@@ -1,4 +1,5 @@
 ﻿using R2API;
+using RegigigasMod.Modules.Achievements;
 using System;
 
 namespace RegigigasMod.Modules
@@ -87,17 +88,20 @@ namespace RegigigasMod.Modules
             #endregion
 
             #region Achievements
+
+            // unlockables tied to achievements dont use tokens
+            const string nameFormat = "ACHIEVEMENT_{0}_NAME";
+            const string descFormat = "ACHIEVEMENT_{0}_DESCRIPTION";
+
             if (Modules.Config.loreFriendly2)
             {
-                LanguageAPI.Add(prefix + "MONSOONUNLOCKABLE_ACHIEVEMENT_NAME", "Stone Juggernaut: Mastery");
-                LanguageAPI.Add(prefix + "MONSOONUNLOCKABLE_ACHIEVEMENT_DESC", "As Stone Juggernaut, beat the game or obliterate on Monsoon.");
-                LanguageAPI.Add(prefix + "MONSOONUNLOCKABLE_UNLOCKABLE_NAME", "Stone Juggernaut: Mastery");
+                LanguageAPI.Add(string.Format(nameFormat, RegigigasMasteryAchievement.IDENTIFIER), "Stone Juggernaut: Mastery");
+                LanguageAPI.Add(string.Format(descFormat, RegigigasMasteryAchievement.IDENTIFIER), "As Stone Juggernaut, beat the game or obliterate on Monsoon.");
             }
             else
             {
-                LanguageAPI.Add(prefix + "MONSOONUNLOCKABLE_ACHIEVEMENT_NAME", "Regigigas: Mastery");
-                LanguageAPI.Add(prefix + "MONSOONUNLOCKABLE_ACHIEVEMENT_DESC", "As Regigigas, beat the game or obliterate on Monsoon.");
-                LanguageAPI.Add(prefix + "MONSOONUNLOCKABLE_UNLOCKABLE_NAME", "Regigigas: Mastery");
+                LanguageAPI.Add(string.Format(nameFormat, RegigigasMasteryAchievement.IDENTIFIER), "Regigigas: Mastery");
+                LanguageAPI.Add(string.Format(descFormat, RegigigasMasteryAchievement.IDENTIFIER), "As Regigigas, beat the game or obliterate on Monsoon.");
             }
             #endregion
 
