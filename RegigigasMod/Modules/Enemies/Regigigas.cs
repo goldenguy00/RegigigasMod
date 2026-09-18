@@ -3720,6 +3720,27 @@ localScale = new Vector3(0.17297F, 0.17297F, 0.17297F),
             On.RoR2.CharacterBody.AddBuff_BuffIndex += CharacterBody_AddBuff_BuffIndex;
             On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += CharacterBody_AddTimedBuff_BuffDef_float;
             On.RoR2.UI.MainMenu.MainMenuController.Awake += MainMenuController_Awake;
+
+            R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
+        }
+
+
+        private static void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)
+        {
+
+            if (sender.HasBuff(Buffs.armorBuff))
+            {
+                args.armorAdd += 500f;
+            }
+
+            if (sender.HasBuff(Buffs.slowStartBuff))
+            {
+
+                args.armorAdd += 20f;
+                args.moveSpeedReductionMultAdd += 1f; //movespeed *= 0.5f // 1 + 1 = divide by 2?
+                args.attackSpeedMultAdd -= 0.5f; //attackSpeed *= 0.5f;
+                args.damageMultAdd -= 0.5f; //damage *= 0.5f;
+            }
         }
 
         private static void MainMenuController_Awake(On.RoR2.UI.MainMenu.MainMenuController.orig_Awake orig, RoR2.UI.MainMenu.MainMenuController self)
@@ -3857,7 +3878,7 @@ localScale = new Vector3(0.17297F, 0.17297F, 0.17297F),
             {
                 // make shiny regi drop irradiant pearl
                 if (damageReport.victimBodyIndex == BodyCatalog.FindBodyIndex("RegigigasBody")) {
-                    Components.RegigigasDropComponent dropComponent = victim.gameObject.GetComponent<Components.RegigigasDropComponent>();
+                    Components.RegigigasDropComponent dropComponent = victim.GetComponent<Components.RegigigasDropComponent>();
                     if (dropComponent) {
                         PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(dropComponent.itemDropDef.itemIndex), damageReport.victimBody.corePosition, Vector3.up * 20f);
                     }

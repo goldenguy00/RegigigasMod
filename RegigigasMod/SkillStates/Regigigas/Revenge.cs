@@ -36,13 +36,13 @@ namespace RegigigasMod.SkillStates.Regigigas
             Transform modelTransform = base.GetModelTransform();
             if (modelTransform)
             {
-                TemporaryOverlay temporaryOverlay = modelTransform.gameObject.AddComponent<TemporaryOverlay>();
+                var temporaryOverlay = TemporaryOverlayManager.AddOverlay(modelTransform.gameObject);
                 temporaryOverlay.duration = this.duration;
                 temporaryOverlay.animateShaderAlpha = true;
                 temporaryOverlay.alphaCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
                 temporaryOverlay.destroyComponentOnEnd = true;
                 temporaryOverlay.originalMaterial = Resources.Load<Material>("Materials/matDoppelganger");
-                temporaryOverlay.AddToCharacerModel(modelTransform.GetComponent<CharacterModel>());
+                temporaryOverlay.AddToCharacterModel(modelTransform.GetComponent<CharacterModel>());
             }
 
             if (this.modelAnimator) this.modelAnimator.SetFloat(AnimationParameters.aimWeight, 0f);

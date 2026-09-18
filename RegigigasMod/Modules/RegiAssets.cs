@@ -44,29 +44,9 @@ namespace RegigigasMod.Modules
 
         internal static void PopulateAssets()
         {
-            if (mainAssetBundle == null)
-            {
-                using (var assetStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("RegigigasMod.regigigas"))
-                {
-                    mainAssetBundle = AssetBundle.LoadFromStream(assetStream);
-                }
-            }
-
-            // lost the original unityproject so this is necessary
-            if (secondaryAssetBundle == null)
-            {
-                using (var assetStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("RegigigasMod.regigigas2"))
-                {
-                    secondaryAssetBundle = AssetBundle.LoadFromStream(assetStream);
-                }
-            }
-
-            using (Stream manifestResourceStream2 = Assembly.GetExecutingAssembly().GetManifestResourceStream("RegigigasMod.RegigigasBank.bnk"))
-            {
-                byte[] array = new byte[manifestResourceStream2.Length];
-                manifestResourceStream2.Read(array, 0, array.Length);
-                SoundAPI.SoundBanks.Add(array);
-            }
+            var path = System.IO.Path.GetDirectoryName(RegigigasPlugin.instance.Info.Location);
+            mainAssetBundle ??= AssetBundle.LoadFromFile(System.IO.Path.Combine(path, "regigigas"));
+            secondaryAssetBundle ??= AssetBundle.LoadFromFile(System.IO.Path.Combine(path, "regigigas2"));
 
             drainPunchChargeEffect = LoadEffect("DrainPunchChargeEffect", true);
 

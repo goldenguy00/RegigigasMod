@@ -1,12 +1,8 @@
-﻿using System;
-using BepInEx;
+﻿using BepInEx;
 using R2API.Utils;
 using RoR2;
 using System.Security;
 using System.Security.Permissions;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
-using RoR2BepInExPack.GameAssetPathsBetter;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -61,46 +57,19 @@ namespace RegigigasMod
             Modules.NetMessages.RegisterNetworkMessages();
 
             new Modules.Enemies.Regigigas().CreateCharacter();
-
-            Hook();
-
             new Modules.ContentPacks().Initialize();
 
             RoR2.ContentManagement.ContentManager.onContentPacksAssigned += LateSetup;
         }
 
-        private void LateSetup(HG.ReadOnlyArray<RoR2.ContentManagement.ReadOnlyContentPack> obj)
+        private static void LateSetup(HG.ReadOnlyArray<RoR2.ContentManagement.ReadOnlyContentPack> obj)
         {
             Modules.Enemies.Regigigas.SetItemDisplays();
 
 
             // hate that i havze to do this
-            //Modules.Buffs.armorBuff.iconSprite = RoR2Content.Buffs.ArmorBoost.iconSprite;
+            Modules.Buffs.armorBuff.iconSprite = RoR2Content.Buffs.ArmorBoost.iconSprite;
             //Modules.Buffs.slowStartBuff.iconSprite = RoR2Content.Buffs.Slow50.iconSprite; wahoo
-
-            // rob you fucking ape
-            Modules.Buffs.armorBuff.iconSprite = Addressables.LoadAssetAsync<Sprite>(RoR2_Base_GainArmor.texBuffElephantArmorBoostIcon_tif).WaitForCompletion();   
-        }
-
-        private void Hook()
-        {
-            R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
-        }
-
-        private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args) {
-
-            if (sender.HasBuff(Modules.Buffs.armorBuff)) {
-
-                args.armorAdd += 500f;
-            }
-
-            if (sender.HasBuff(Modules.Buffs.slowStartBuff)) {
-
-                args.armorAdd += 20f;
-                args.moveSpeedReductionMultAdd += 1f; //movespeed *= 0.5f // 1 + 1 = divide by 2?
-                args.attackSpeedMultAdd -= 0.5f; //attackSpeed *= 0.5f;
-                args.damageMultAdd -= 0.5f; //damage *= 0.5f;
-            }
         }
     }
 }

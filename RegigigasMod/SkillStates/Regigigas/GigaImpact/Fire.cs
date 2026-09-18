@@ -55,23 +55,27 @@ namespace RegigigasMod.SkillStates.Regigigas.GigaImpact
             this.effectInstance.transform.localPosition = Vector3.zero;
             this.effectInstance.transform.localRotation = Quaternion.identity;
 
-            this.rushBlastAttack = new BlastAttack();
-            this.rushBlastAttack.attacker = this.gameObject;
-            this.rushBlastAttack.inflictor = this.gameObject;
-            this.rushBlastAttack.teamIndex = this.GetTeam();
-            this.rushBlastAttack.procCoefficient = 0f;
-            this.rushBlastAttack.radius = 48f;
-            this.rushBlastAttack.baseForce = -200;
-            this.rushBlastAttack.baseDamage = 0f;
-            this.rushBlastAttack.falloffModel = BlastAttack.FalloffModel.None;
-            this.rushBlastAttack.damageColorIndex = DamageColorIndex.Default;
-            this.rushBlastAttack.attackerFiltering = AttackerFiltering.NeverHitSelf;
-            this.rushBlastAttack.damageType = DamageType.IgniteOnHit | DamageTypeCombo.GenericSpecial;
+            this.rushBlastAttack = new BlastAttack
+            {
+                attacker = this.gameObject,
+                inflictor = this.gameObject,
+                teamIndex = this.GetTeam(),
+                procCoefficient = 0f,
+                radius = 48f,
+                baseForce = -200,
+                baseDamage = 0f,
+                falloffModel = BlastAttack.FalloffModel.None,
+                damageColorIndex = DamageColorIndex.Default,
+                attackerFiltering = AttackerFiltering.NeverHitSelf,
+                damageType = DamageType.IgniteOnHit | DamageTypeCombo.GenericSpecial
+            };
 
-            EffectData effectData = new EffectData();
-            effectData.origin = this.characterBody.footPosition;
-            effectData.rotation = Util.QuaternionSafeLookRotation(this.characterDirection.forward);
-            effectData.scale = 8f;
+            EffectData effectData = new EffectData
+            {
+                origin = this.characterBody.footPosition,
+                rotation = Util.QuaternionSafeLookRotation(this.characterDirection.forward),
+                scale = 8f
+            };
 
             EffectManager.SpawnEffect(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Grandparent/GrandparentSpawnImpact.prefab").WaitForCompletion(), effectData, false);
         }
@@ -107,21 +111,21 @@ namespace RegigigasMod.SkillStates.Regigigas.GigaImpact
 
             if (this.modelTransform)
             {
-                TemporaryOverlay temporaryOverlay = this.modelTransform.gameObject.AddComponent<TemporaryOverlay>();
+                var temporaryOverlay = TemporaryOverlayManager.AddOverlay(this.modelTransform.gameObject);
                 temporaryOverlay.duration = 3f;
                 temporaryOverlay.animateShaderAlpha = true;
                 temporaryOverlay.alphaCurve = AnimationCurve.EaseInOut(0f, 5f, 1f, 0f);
                 temporaryOverlay.destroyComponentOnEnd = true;
                 temporaryOverlay.originalMaterial = Resources.Load<Material>("Materials/matOnFire");
-                temporaryOverlay.AddToCharacerModel(this.characterModel);
+                temporaryOverlay.AddToCharacterModel(this.characterModel);
 
-                TemporaryOverlay temporaryOverlay2 = this.modelTransform.gameObject.AddComponent<TemporaryOverlay>();
+                var temporaryOverlay2 = TemporaryOverlayManager.AddOverlay(this.modelTransform.gameObject);
                 temporaryOverlay2.duration = 5f;
                 temporaryOverlay2.animateShaderAlpha = true;
                 temporaryOverlay2.alphaCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
                 temporaryOverlay2.destroyComponentOnEnd = true;
                 temporaryOverlay2.originalMaterial = Resources.Load<Material>("Materials/matOnFire");
-                temporaryOverlay2.AddToCharacerModel(this.characterModel);
+                temporaryOverlay2.AddToCharacterModel(this.characterModel);
             }
 
             this.characterModel.invisibilityCount--;
@@ -156,20 +160,22 @@ namespace RegigigasMod.SkillStates.Regigigas.GigaImpact
 
             if (base.isAuthority)
             {
-                BlastAttack blastAttack = new BlastAttack();
-                blastAttack.attacker = this.gameObject;
-                blastAttack.inflictor = this.gameObject;
-                blastAttack.teamIndex = this.GetTeam();
-                blastAttack.position = this.characterBody.corePosition;
-                blastAttack.procCoefficient = 1f;
-                blastAttack.radius = GigaImpactOld.blastAttackRadius;
-                blastAttack.baseForce = GigaImpactOld.blastAttackForce;
-                blastAttack.bonusForce = Vector3.up * GigaImpactOld.blastAttackBonusForce;
-                blastAttack.baseDamage = GigaImpactOld.blastAttackDamageCoefficient * this.damageStat;
-                blastAttack.falloffModel = BlastAttack.FalloffModel.None;
-                blastAttack.damageColorIndex = DamageColorIndex.Default;
-                blastAttack.attackerFiltering = AttackerFiltering.NeverHitSelf;
-                blastAttack.damageType = DamageType.IgniteOnHit | DamageType.Stun1s | DamageTypeCombo.GenericSpecial;
+                BlastAttack blastAttack = new BlastAttack
+                {
+                    attacker = this.gameObject,
+                    inflictor = this.gameObject,
+                    teamIndex = this.GetTeam(),
+                    position = this.characterBody.corePosition,
+                    procCoefficient = 1f,
+                    radius = GigaImpactOld.blastAttackRadius,
+                    baseForce = GigaImpactOld.blastAttackForce,
+                    bonusForce = Vector3.up * GigaImpactOld.blastAttackBonusForce,
+                    baseDamage = GigaImpactOld.blastAttackDamageCoefficient * this.damageStat,
+                    falloffModel = BlastAttack.FalloffModel.None,
+                    damageColorIndex = DamageColorIndex.Default,
+                    attackerFiltering = AttackerFiltering.NeverHitSelf,
+                    damageType = DamageType.IgniteOnHit | DamageType.Stun1s | DamageTypeCombo.GenericSpecial
+                };
                 blastAttack.Fire();
             }
         }

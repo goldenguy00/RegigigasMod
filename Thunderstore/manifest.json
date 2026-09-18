@@ -1,0 +1,20 @@
+{
+  "name": "Regigigas",
+  "version_number": "1.6.1",
+  "website_url": "",
+  "description": "The Pokémon's Attack and Speed stats are halved until it gets going.",
+  "dependencies": [
+    "bbepis-BepInExPack-5.4.2122",
+    "RiskofThunder-HookGenPatcher-1.2.9",
+    "RiskofThunder-R2API_ContentManagement-1.0.11",
+    "RiskofThunder-R2API_Core-5.3.0",
+    "RiskofThunder-R2API_DamageType-1.1.7",
+    "RiskofThunder-R2API_Director-3.1.0",
+    "RiskofThunder-R2API_Items-1.0.8",
+    "RiskofThunder-R2API_Language-1.1.0",
+    "RiskofThunder-R2API_Networking-1.0.4",
+    "RiskofThunder-R2API_Prefab-1.1.1",
+    "RiskofThunder-R2API_RecalculateStats-1.6.6",
+    "RiskofThunder-R2API_Sound-1.0.3"
+  ]
+}
